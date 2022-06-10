@@ -2,30 +2,32 @@
 #ifndef INCLUDE_TSTACK_H_
 #define INCLUDE_TSTACK_H_
 
-template<typename T, int size>
+template <typename T, int size>
 class TStack {
  private:
-  T arr[100];
+  T arr[1000];
   int top;
+
  public:
-  TStack():top(-1) { }
-  T get() const {
+  TStack() : top(-1) {}
+  bool isEmpty() { return top == -1; }
+  bool isFull() { return size == top + 1; }
+  T get() {
+    if (isEmpty()) throw "The stack is empty";
     return arr[top];
   }
-  int isFull() const {
-    return top == size - 1;
-  }
-  int isEmpty() const {
-    return top == -1;
-  }
-  void push(T w) {
-    if (top < size - 1)
-      arr[++top] = w;
+  T getAndPop() {
+    T t = get();
+    pop();
+    return t;
   }
   void pop() {
-    if (top >= 0)
-      top--;
+    if (!isEmpty()) top--;
+  }
+  bool push(T value) {
+    if (isFull()) return false;
+    arr[++top] = value;
+    return true;
   }
 };
-int prior(char ch);
 #endif  // INCLUDE_TSTACK_H_
