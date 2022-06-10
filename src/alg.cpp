@@ -1,67 +1,150 @@
-/ Copyright 2021 NIKITA ERMOLAEV
-#include <map>
+// Copyright 2021 NNTU-CS
+#include <math.h>
 #include <string>
-
+#include <map>
 #include "tstack.h"
 
-std::string infx2pstfx(std::string inf) {
-  TStack<char, 100> result;
-  TStack<char, 100> stack;
-  int currentNumber = 0;
-  for (int i = 0; i < inf.size(); i++) switch (inf[i]) {
-      case '+':
-      case '-':
-        if (stack.get() == '/' || stack.get() == '*')
-          result.push(stack.getAndPop());
-      case '*':
-      case '/':
-      case '(':
-        stack.push(inf[i]);
-        break;
-      case ')':
-        while (stack.get() != '(') result.push(stack.getAndPop());
-        stack.pop();
-        while (!stack.isEmpty()) {
-          if (stack.get() == '(' || stack.get() == '+' || stack.get() == '-')
-            break;
-          result.push(stack.getAndPop());
-        }
-        break;
-      default:
-        result.push(inf[i]);
-        break;
-    }
-  while (!stack.isEmpty()) result.push(stack.getAndPop());
-  std::string resString = "";
-  while (!result.isEmpty())
-    resString =
-        result.getAndPop() + (resString.size() == 0 ? "" : " " + resString);
-  printf("\n123: %s\n\n", resString.c_str());
-  return resString;
+bool search(const std::string &str, const char &c) {
+  for (int i = 0; i < str.size(); ++i)
+    if (c == str[i])
+      return true;
+  return false;
 }
 
-int eval(std::string pref) {
-  TStack<int, 100> stack;
-  for (int i = 0; i < pref.size(); i++) {
-    if (pref[i] >= '0') stack.push(pref[i] - '0');
-    switch (pref[i]) {
-      case '+':
-        stack.push(stack.getAndPop() + stack.getAndPop());
-        break;
-      case '-': {
-        int tmp = stack.getAndPop();
-        stack.push(stack.getAndPop() - tmp);
-        break;
+int strindex(const std::string &str, const char &n) {
+  int i = 0;
+  for (; str[i]; ++i)
+    if (str[i] == n)
+      break;
+  return i;
+}
+
+int convertToInt(std::string str) {
+  std::string nums = "0123456789";
+  int ans = 0, pluser = 0;
+  int n = 0;
+  for (int i = 0; i < str.size(); ++i) {
+    pluser = strindex(nums, str[i])*pow(10, str.size()-1-n);
+    ans += pluser;
+    n += 1;
+  }
+  return ans;
+}
+
+int convertToInt(const char &c) {
+  std::string nums = "0123456789";
+  int i = 0;
+  for (; i < nums.size(); ++i) {
+    if (c == nums[i])
+      break;
+  }
+  return i;
+}
+
+int priority(const char &c) {
+  if ('(' == c)
+    return 0;
+  if (')' == c)
+    return 1;
+  if ('+' == c || '-' == c)
+    return 2;
+  if ('*' == c || '/' == c)
+    return 3;
+  else
+    throw "Not operation !";
+}
+
+int Calculator(int x, char op, int y) {
+  if ('+' == op)
+    return x + y;
+  if ('-' == op)
+    return x - y;
+  if ('*' == op)
+    return x * y;
+  if ('/' == op)
+    return x / y;
+  return -10000000;
+}
+
+std::string infx2pstfx(std::string inf) {
+  TStack <char, 100> stack1;
+  std::string Nums = "0123456789";
+  std::string StringOfOperates = "()+-*/";
+  std::string OutString;
+  std::string NewString;
+  std::string temple;
+  NewString = '(' + inf + ')';
+  for (int i = 0; i < NewString.size(); ++i) {
+    if (search(Nums, NewString[i])) {
+      if (0 == temple.size())
+        temple.push_back(NewString[i]);
+      else if (search(Nums, NewString[i - 1]))
+        temple.push_back(NewString[i]);
+      if (i < NewString.size() - 1 && !(search(Nums, NewString[i + 1]))) {
+        OutString += temple;
+        OutString.push_back(' ');
+        temple = "";
       }
-      case '*':
-        stack.push(stack.getAndPop() * stack.getAndPop());
-        break;
-      case '/': {
-        int tmp = stack.getAndPop();
-        stack.push(stack.getAndPop() / tmp);
-        break;
+    }
+    if (search(StringOfOperates, NewString[i])) {
+      if (((stack1.isEmpty()) ||
+            0 == priority(NewString[i])) ||
+           (priority(NewString[i]) > priority(stack1.get()))) {
+              stack1.push(NewString[i]);
+    } else {
+        while (priority(stack1.get()) >= priority(NewString[i])) {
+          OutString.push_back(stack1.get());
+          OutString.push_back(' ');
+          stack1.pop();
+        }
+        if (')' != NewString[i])
+          stack1.push(NewString[i]);
+        else
+          stack1.pop();
+       }
+    }
+    if (i == NewString.size() - 1 && !(stack1.isEmpty())) {
+      while (!(stack1.isEmpty())) {
+        if (i != NewString.size() && stack1.get() != '(') {
+          OutString.push_back(' ');
+          OutString.push_back(stack1.get());
+        }
+        stack1.pop();
       }
     }
   }
-  return stack.get();
+  if (' ' == OutString[OutString.size() - 1])
+    OutString.resize(OutString.size() - 1);
+  return OutString;
+}
+
+int eval(std::string pref) {
+  TStack <int, 100> stack2;
+  int x = 0;
+  int y = 0;
+  std::string temple;
+  for (int i = 0; i < pref.size(); ++i) {
+    std::string Nums = "0123456789";
+    std::string StringOfOperates = "+-*/";
+    if (search(Nums, pref[i])) {
+      int num = 0;
+      if (0 == temple.size())
+        temple.push_back(pref[i]);
+      else if (search(Nums, pref[i - 1]))
+        temple.push_back(pref[i]);
+      if (i < pref.size() && !(search(Nums, pref[i + 1]))) {
+        num = convertToInt(temple);
+        stack2.push(num);
+        temple = "";
+      }
+    } else if (search(StringOfOperates, pref[i])) {
+        y = stack2.get();
+        stack2.pop();
+        x = stack2.get();
+        stack2.pop();
+        int res = Calculator(x, pref[i], y);
+        stack2.push(res);
+      }
+  }
+  return stack2.get();
 }
