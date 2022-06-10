@@ -5,26 +5,27 @@
 template<typename T, int size>
 class TStack {
  private:
-T a[500];
-int head;
+  T arr[100];
+  int top;
  public:
-TStack(): head(-1) { }
-T get() const {
-return a[head];
-}
-bool Empty() const {
-return head == -1;
-}
-bool Full() const {
-return head == (size-1);
-}
-void del() {
-if(!Empty())
-head--;
-}
-void push(T value) {
-if(!(Full()))
-a[++head] = value;
-}
+  TStack():top(-1) { }
+  T get() const {
+    return arr[top];
+  }
+  int isFull() const {
+    return top == size - 1;
+  }
+  int isEmpty() const {
+    return top == -1;
+  }
+  void push(T w) {
+    if (top < size - 1)
+      arr[++top] = w;
+  }
+  void pop() {
+    if (top >= 0)
+      top--;
+  }
 };
+int prior(char ch);
 #endif  // INCLUDE_TSTACK_H_
